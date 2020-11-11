@@ -119,6 +119,8 @@ bool AccessController::addPermissionEntry(const Category f_category,
         {
             return addPermissionEntry(f_category, f_permission, id.value());
         }
+
+        break;
     }
     case Category::SPECIFIC_GROUP:
     {
