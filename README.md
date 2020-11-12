@@ -9,6 +9,7 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Codecov](https://codecov.io/gh/eclipse/iceoryx/branch/master/graph/badge.svg?branch=master)](https://codecov.io/gh/eclipse/iceoryx?branch=master)
 [![Colcon build](https://github.com/eclipse/iceoryx/workflows/Colcon%20build/badge.svg?branch=master)](https://github.com/eclipse/iceoryx/actions)
+[![deepcode](https://www.deepcode.ai/api/gh/badge?key=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwbGF0Zm9ybTEiOiJnaCIsIm93bmVyMSI6InByYXNhbm5hYmhhdCIsInJlcG8xIjoiaWNlb3J5eCIsImluY2x1ZGVMaW50IjpmYWxzZSwiYXV0aG9ySWQiOjIzOTEzLCJpYXQiOjE2MDUxNDI4NjJ9.pfQTTf4oKrEpzptMVmURg_CXB5pi-z8ZvxCNEAr_kHo)](https://www.deepcode.ai/app/gh/prasannabhat/iceoryx/_/dashboard?utm_content=gh%2Fprasannabhat%2Ficeoryx)
 
 ## Introduction
 
