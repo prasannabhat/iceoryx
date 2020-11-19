@@ -118,6 +118,7 @@ while (( "$#" )); do
     "sanitize")
         echo "Build with sanitizers & run tests"
         BUILD_TYPE="Debug"
+        TEST_FLAG="ON"
         RUN_TEST=true
         SANITIZE_FLAG="ON"
         shift 1
@@ -194,7 +195,7 @@ cmake --build . --target install -- -j$NUM_JOBS
 echo ">>>>>> Finished building iceoryx package <<<<<<"
 
 # Dont complicate application linking process with additional libraries
-if [ "$COV_FLAG" == "ON" ||  "$SANITIZE_FLAG" == "ON" ]
+if [ "$COV_FLAG" == "ON" ] || [ "$SANITIZE_FLAG" == "ON" ]
 then
     echo ">>>>>> Skip building iceoryx examples <<<<<<"
 else
