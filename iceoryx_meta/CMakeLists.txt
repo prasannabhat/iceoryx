@@ -46,14 +46,13 @@ endif(coverage)
 
 if(sanitize)
     if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-        set(SANITIZE_FLAGS "-fsanitize=address -fno-omit-frame-pointer -fno-optimize-sibling-calls -g")
-        set(SANITIZE_DEPENDENT_FLAGS "-O1")
-        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${SANITIZE_FLAGS} ${SANITIZE_DEPENDENT_FLAGS}")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${SANITIZE_FLAGS} ${SANITIZE_DEPENDENT_FLAGS}")
+        set(SANITIZE_COMPILE_FLAGS -fsanitize=address -fno-omit-frame-pointer -fno-optimize-sibling-calls -g -O1)
+        set(SANITIZE_LINK_FLAGS "-g -fsanitize=address")
     else(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
         message( FATAL_ERROR "You need to run sanitize with gcc/clang compiler." )
     endif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 endif(sanitize)
+
 
 if(test)
     add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../cmake/googletest ${CMAKE_BINARY_DIR}/dependencies/googletest/prebuild)
