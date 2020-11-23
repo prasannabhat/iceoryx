@@ -188,7 +188,7 @@ cxx::expected<IpcChannelError> MessageQueue::send(const std::string& msg) const
     return cxx::success<void>();
 }
 
-__attribute__((no_sanitize_address)) cxx::expected<std::string, IpcChannelError> MessageQueue::receive() const
+ATTRIBUTE_NO_SANITIZE_ADDRESS cxx::expected<std::string, IpcChannelError> MessageQueue::receive() const
 {
     char message[MAX_MESSAGE_SIZE];
     auto mqCall = cxx::makeSmartC(mq_receive,

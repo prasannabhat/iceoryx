@@ -14,6 +14,14 @@
 #ifndef IOX_UTILS_CXX_SMART_C_HPP
 #define IOX_UTILS_CXX_SMART_C_HPP
 
+// TEMP : ATTRIBUTE_NO_SANITIZE_ADDRESS placed here because this looks to be a common file , which everyone somehow
+// seems to use it !
+#if defined(__clang__) || defined(__GNUC__)
+#define ATTRIBUTE_NO_SANITIZE_ADDRESS __attribute__((no_sanitize_address))
+#else
+#define ATTRIBUTE_NO_SANITIZE_ADDRESS
+#endif
+
 #include "iceoryx_utils/cxx/string.hpp"
 #include "iceoryx_utils/platform/platform_correction.hpp"
 

@@ -30,7 +30,7 @@ struct Position
     double_t z{Z_POS};
 };
 
-__attribute__((no_sanitize_address)) class UniquePtrTest : public Test
+class UniquePtrTest : public Test
 {
   public:
     void SetUp()
