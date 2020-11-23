@@ -77,13 +77,13 @@ for COMPONENT in $COMPONENTS; do
 
     case $GCOV_SCOPE in    
         "unit" | "all")
-            [ -f ./"$COMPONENT"_moduletests ] && ./"$COMPONENT"_moduletests --gtest_filter="${GTEST_FILTER}" --gtest_output="xml:$TEST_RESULTS_DIR/"$COMPONENT"_ModuleTestResults.xml"
+            ([ -f ./"$COMPONENT"_moduletests ] && ./"$COMPONENT"_moduletests --gtest_filter="${GTEST_FILTER}" --gtest_output="xml:$TEST_RESULTS_DIR/"$COMPONENT"_ModuleTestResults.xml") || true
             ;;
         "component" | "all")
-            [ -f ./"$COMPONENT"_componenttests ] && ./"$COMPONENT"_componenttests --gtest_filter="${GTEST_FILTER}" --gtest_output="xml:$TEST_RESULTS_DIR/"$COMPONENT"_ComponenttestTestResults.xml"
+            ([ -f ./"$COMPONENT"_componenttests ] && ./"$COMPONENT"_componenttests --gtest_filter="${GTEST_FILTER}" --gtest_output="xml:$TEST_RESULTS_DIR/"$COMPONENT"_ComponenttestTestResults.xml") || true
             ;;
         "integration" | "all") 
-            [ -f ./"$COMPONENT"_integrationtests ] && ./"$COMPONENT"_integrationtests --gtest_filter="${GTEST_FILTER}" --gtest_output="xml:$TEST_RESULTS_DIR/"$COMPONENT"_IntegrationTestResults.xml"
+            ([ -f ./"$COMPONENT"_integrationtests ] && ./"$COMPONENT"_integrationtests --gtest_filter="${GTEST_FILTER}" --gtest_output="xml:$TEST_RESULTS_DIR/"$COMPONENT"_IntegrationTestResults.xml") || true
             ;;
       esac
 done
