@@ -1,0 +1,10 @@
+# [address]
+# Ignore reports from bad_foo function.
+src:*test_base_port.cpp*
+src:*test_cxx_unique_ptr.cpp*
+fun:*UniquePtrTest_ReleaseAnObjectResultsInUniquePtrBeingInvalidAndReturnOfObjectPtr_Test*
+fun:*UniquePtrTest_ReleaseAnObjectResultsInUniquePtrBeingInvalidAndReturnOfObjectPtr_Test::TestBody*
+fun:*CreateInterfacePort*
+fun:_Z8CreateInterfacePortv
+fun:*MessageQueue::receive*
+fun:*MessageQueue::_Z8receivev*
