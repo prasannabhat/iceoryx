@@ -68,6 +68,7 @@ echo ">>>>>> Running Ice0ryx Tests <<<<<<"
 
 set -e
 
+# Probably there is a bug here , not all the tests are running !
 for COMPONENT in $COMPONENTS; do
     echo ""
     echo "######################## executing moduletests & componenttests for $COMPONENT ########################"
