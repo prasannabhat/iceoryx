@@ -20,6 +20,7 @@ COMPONENTS="utils posh binding_c"
 GTEST_FILTER="*"
 BASE_DIR=$PWD
 GCOV_SCOPE="all"
+CONTINUE_ON_ERROR=false
 
 for arg in "$@"
 do 
@@ -32,6 +33,9 @@ do
             ;;
         "only-timing-tests")
             GTEST_FILTER="*.TimingTest_*"
+            ;;
+        "continue-on-error")
+            CONTINUE_ON_ERROR=true
             ;;
         "all" | "component" | "unit" | "integration")
             GCOV_SCOPE="$arg"
@@ -46,6 +50,7 @@ do
             echo "      skip-dds-tests              Skips tests for iceoryx_dds"
             echo "      disable-timing-tests        Disables all timing tests"
             echo "      only-timing-tests           Runs only timing tests"
+            echo "      continue-on-error           Continue execution upon error"
             echo ""
             exit -1
             ;;
@@ -66,8 +71,14 @@ mkdir -p "$TEST_RESULTS_DIR"
 
 echo ">>>>>> Running Ice0ryx Tests <<<<<<"
 
-set -e
+if [ $CONTINUE_ON_ERROR == false ]
+then
+    set -e
+fi
 
+
+
+test_result=0
 for COMPONENT in $COMPONENTS; do
     echo ""
     echo "######################## executing moduletests & componenttests for $COMPONENT ########################"
@@ -77,18 +88,31 @@ for COMPONENT in $COMPONENTS; do
 
     case $GCOV_SCOPE in    
         "unit" | "all")
-            ([ -f ./"$COMPONENT"_moduletests ] && ./"$COMPONENT"_moduletests --gtest_filter="${GTEST_FILTER}" --gtest_output="xml:$TEST_RESULTS_DIR/"$COMPONENT"_ModuleTestResults.xml") || true
+            [ -f ./"$COMPONENT"_moduletests ] && ./"$COMPONENT"_moduletests --gtest_filter="${GTEST_FILTER}" --gtest_output="xml:$TEST_RESULTS_DIR/"$COMPONENT"_ModuleTestResults.xml"
+            test_status=$?
+            echo "Test status is $test_status"
             ;;
         "component" | "all")
-            ([ -f ./"$COMPONENT"_componenttests ] && ./"$COMPONENT"_componenttests --gtest_filter="${GTEST_FILTER}" --gtest_output="xml:$TEST_RESULTS_DIR/"$COMPONENT"_ComponenttestTestResults.xml") || true
+            [ -f ./"$COMPONENT"_componenttests ] && ./"$COMPONENT"_componenttests --gtest_filter="${GTEST_FILTER}" --gtest_output="xml:$TEST_RESULTS_DIR/"$COMPONENT"_ComponenttestTestResults.xml"
+            test_status=$?
+            echo "Test status is $test_status"
             ;;
         "integration" | "all") 
-            ([ -f ./"$COMPONENT"_integrationtests ] && ./"$COMPONENT"_integrationtests --gtest_filter="${GTEST_FILTER}" --gtest_output="xml:$TEST_RESULTS_DIR/"$COMPONENT"_IntegrationTestResults.xml") || true
+            [ -f ./"$COMPONENT"_integrationtests ] && ./"$COMPONENT"_integrationtests --gtest_filter="${GTEST_FILTER}" --gtest_output="xml:$TEST_RESULTS_DIR/"$COMPONENT"_IntegrationTestResults.xml"
+            test_status=$?
+            echo "Test status is $test_status"
             ;;
-      esac
+    esac
 done
 
 # do not start RouDi while the module and componenttests are running;
 # they might do things which hurts RouDi, like in the roudi_shm test where named semaphores are opened and closed
 
+if [ $test_result != 0 ]
+then
+    echo "Not all the tests passed !"
+fi
+echo "test result is $test_result"
 echo ">>>>>> Finished Running Iceoryx Tests <<<<<<"
+
+
