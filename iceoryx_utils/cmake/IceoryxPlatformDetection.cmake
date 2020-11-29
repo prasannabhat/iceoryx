@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http:#www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,11 +22,11 @@ if(UNIX AND NOT APPLE)
 endif(UNIX AND NOT APPLE)
 
 if(LINUX)
-    set(ICEORYX_CXX_STANDARD 11)
+    set(ICEORYX_CXX_STANDARD 14)
 elseif(QNX)
-    set(ICEORYX_CXX_STANDARD 11)
+    set(ICEORYX_CXX_STANDARD 14)
 elseif(WIN32)
-    set(ICEORYX_CXX_STANDARD 11)
+    set(ICEORYX_CXX_STANDARD 14)
 elseif(APPLE)
     set(ICEORYX_CXX_STANDARD 17)
 endif(LINUX)

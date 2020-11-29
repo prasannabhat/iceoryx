@@ -33,58 +33,18 @@ template <typename T, typename port_t>
 class StubbedBaseSubscriber : public iox::popo::BaseSubscriber<T, port_t>
 {
   public:
-    StubbedBaseSubscriber(iox::capro::ServiceDescription sd)
-        : iox::popo::BaseSubscriber<T, port_t>::BaseSubscriber(sd)
-    {
-    }
-    uid_t getUid() const noexcept
-    {
-        return iox::popo::BaseSubscriber<T, port_t>::getUid();
-    }
-    iox::capro::ServiceDescription getServiceDescription() const noexcept
-    {
-        return iox::popo::BaseSubscriber<T, port_t>::getServiceDescription();
-    }
-    void subscribe(const uint64_t queueCapacity = iox::MAX_SUBSCRIBER_QUEUE_CAPACITY) noexcept
-    {
-        return iox::popo::BaseSubscriber<T, port_t>::subscribe(queueCapacity);
-    }
-    iox::SubscribeState getSubscriptionState() const noexcept
-    {
-        return iox::popo::BaseSubscriber<T, port_t>::getSubscriptionState();
-    }
-    void unsubscribe() noexcept
-    {
-        return iox::popo::BaseSubscriber<T, port_t>::unsubscribe();
-    }
-    bool hasNewSamples() const noexcept
-    {
-        return iox::popo::BaseSubscriber<T, port_t>::hasNewSamples();
-    }
-    iox::cxx::expected<iox::cxx::optional<iox::popo::Sample<const T>>, iox::popo::ChunkReceiveError> receive() noexcept
-    {
-        return iox::popo::BaseSubscriber<T, port_t>::receive();
-    }
-    iox::cxx::optional<iox::cxx::unique_ptr<iox::mepoo::ChunkHeader>> receiveHeader() noexcept
-    {
-        return iox::popo::BaseSubscriber<T, port_t>::receiveHeader();
-    }
-    void releaseQueuedSamples() noexcept
-    {
-        return iox::popo::BaseSubscriber<T, port_t>::releaseQueuedSamples();
-    }
-    bool setConditionVariable(iox::popo::ConditionVariableData* const conditionVariableDataPtr) noexcept override
-    {
-        return iox::popo::BaseSubscriber<T, port_t>::setConditionVariable(conditionVariableDataPtr);
-    }
-    bool unsetConditionVariable() noexcept override
-    {
-        return iox::popo::BaseSubscriber<T, port_t>::unsetConditionVariable();
-    }
-    virtual bool hasTriggered() const noexcept override
-    {
-        return iox::popo::BaseSubscriber<T, port_t>::hasTriggered();
-    }
+    using iox::popo::BaseSubscriber<T, port_t>::getServiceDescription;
+    using iox::popo::BaseSubscriber<T, port_t>::getSubscriptionState;
+    using iox::popo::BaseSubscriber<T, port_t>::getUid;
+    using iox::popo::BaseSubscriber<T, port_t>::hasMissedSamples;
+    using iox::popo::BaseSubscriber<T, port_t>::hasNewSamples;
+    using iox::popo::BaseSubscriber<T, port_t>::hasTriggered;
+    using iox::popo::BaseSubscriber<T, port_t>::releaseQueuedSamples;
+    using iox::popo::BaseSubscriber<T, port_t>::setConditionVariable;
+    using iox::popo::BaseSubscriber<T, port_t>::subscribe;
+    using iox::popo::BaseSubscriber<T, port_t>::take;
+    using iox::popo::BaseSubscriber<T, port_t>::unsetConditionVariable;
+    using iox::popo::BaseSubscriber<T, port_t>::unsubscribe;
     port_t& getMockedPort()
     {
         return iox::popo::BaseSubscriber<T, port_t>::m_port;
@@ -111,7 +71,7 @@ class BaseSubscriberTest : public Test
     }
 
   protected:
-    TestBaseSubscriber sut{{"", "", ""}};
+    TestBaseSubscriber sut{};
 };
 
 TEST_F(BaseSubscriberTest, SubscribeCallForwardedToUnderlyingSubscriberPort)
@@ -163,12 +123,12 @@ TEST_F(BaseSubscriberTest, ReceiveReturnsAllocatedMemoryChunksWrappedInSample)
         .WillOnce(Return(ByMove(iox::cxx::success<iox::cxx::optional<const iox::mepoo::ChunkHeader*>>(
             const_cast<const iox::mepoo::ChunkHeader*>(chunk)))));
     // ===== Test ===== //
-    auto result = sut.receive();
+    auto result = sut.take();
     // ===== Verify ===== //
     EXPECT_EQ(false, result.has_error());
-    EXPECT_EQ(true, result.get_value().has_value());
+    EXPECT_EQ(true, result.value().has_value());
     EXPECT_EQ(reinterpret_cast<DummyData*>(chunk->payload()),
-              result.get_value().value().get()); // Checks they point to the same memory location.
+              result.value().value().get()); // Checks they point to the same memory location.
     // ===== Cleanup ===== //
 }
 
@@ -183,7 +143,7 @@ TEST_F(BaseSubscriberTest, ReceivedSamplesAreAutomaticallyDeletedWhenOutOfScope)
     EXPECT_CALL(sut.getMockedPort(), releaseChunk).Times(AtLeast(1));
     // ===== Test ===== //
     {
-        auto result = sut.receive();
+        auto result = sut.take();
     }
     // ===== Verify ===== //
     // ===== Cleanup ===== //
@@ -196,7 +156,7 @@ TEST_F(BaseSubscriberTest, ReceiveForwardsErrorsFromUnderlyingPort)
         .WillOnce(Return(ByMove(iox::cxx::error<iox::popo::ChunkReceiveError>(
             iox::popo::ChunkReceiveError::TOO_MANY_CHUNKS_HELD_IN_PARALLEL))));
     // ===== Test ===== //
-    auto result = sut.receive();
+    auto result = sut.take();
     // ===== Verify ===== //
     EXPECT_EQ(true, result.has_error());
     // ===== Cleanup ===== //
@@ -209,10 +169,10 @@ TEST_F(BaseSubscriberTest, ReceiveReturnsEmptyOptionalIfUnderlyingPortReturnsEmp
         .WillOnce(
             Return(ByMove(iox::cxx::success<iox::cxx::optional<const iox::mepoo::ChunkHeader*>>(iox::cxx::nullopt))));
     // ===== Test ===== //
-    auto result = sut.receive();
+    auto result = sut.take();
     // ===== Verify ===== //
     EXPECT_EQ(false, result.has_error());
-    EXPECT_EQ(false, result.get_value().has_value());
+    EXPECT_EQ(false, result.value().has_value());
     // ===== Cleanup ===== //
 }
 
@@ -254,6 +214,35 @@ TEST_F(BaseSubscriberTest, HasTriggeredCallForwardedToUnderlyingSubscriberPort)
     EXPECT_CALL(sut.getMockedPort(), hasNewChunks).Times(1);
     // ===== Test ===== //
     sut.hasTriggered();
+    // ===== Verify ===== //
+    // ===== Cleanup ===== //
+}
+
+TEST_F(BaseSubscriberTest, GetServiceDescriptionCallForwardedToUnderlyingSubscriberPort)
+{
+    // ===== Setup ===== //
+    EXPECT_CALL(sut.getMockedPort(), getServiceDescription).Times(1);
+    // ===== Test ===== //
+    sut.getServiceDescription();
+    // ===== Verify ===== //
+    // ===== Cleanup ===== //
+}
+
+TEST_F(BaseSubscriberTest, HasMissedSamplesCallForwardedToUnderlyingSubscriberPort)
+{
+    // ===== Setup ===== //
+    EXPECT_CALL(sut.getMockedPort(), hasLostChunksSinceLastCall).Times(1);
+    // ===== Test ===== //
+    sut.hasMissedSamples();
+    // ===== Verify ===== //
+    // ===== Cleanup ===== //
+}
+
+TEST_F(BaseSubscriberTest, DestroysUnderlyingPortOnDestruction)
+{
+    // ===== Setup ===== //
+    EXPECT_CALL(sut.getMockedPort(), destroy).Times(1);
+    // ===== Test ===== //
     // ===== Verify ===== //
     // ===== Cleanup ===== //
 }

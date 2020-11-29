@@ -61,15 +61,15 @@ PortManager::PortManager(RouDiMemoryInterface* roudiMemoryInterface) noexcept
     // Remark: m_portIntrospection is not fully functional in base class RouDiBase (has no active senderport)
     // are there used instances of RouDiBase?
     auto portGeneric =
-        acquireSenderPortData(IntrospectionPortService, MQ_ROUDI_NAME, introspectionMemoryManager).get_value();
+        acquireSenderPortData(IntrospectionPortService, MQ_ROUDI_NAME, introspectionMemoryManager).value();
 
     auto portThroughput =
         acquireSenderPortData(IntrospectionPortThroughputService, MQ_ROUDI_NAME, introspectionMemoryManager)
-            .get_value();
+            .value();
 
     auto receiverPortsData =
         acquireSenderPortData(IntrospectionReceiverPortChangingDataService, MQ_ROUDI_NAME, introspectionMemoryManager)
-            .get_value();
+            .value();
 
     m_portIntrospection.registerSenderPort(portGeneric, portThroughput, receiverPortsData);
     m_portIntrospection.run();
@@ -82,8 +82,10 @@ void PortManager::stopPortIntrospection() noexcept
 
 void PortManager::doDiscovery() noexcept
 {
+    /// @todo remove deprecated port #25
     handleSenderPorts();
 
+    /// @todo remove deprecated port #25
     handleReceiverPorts();
 
     handlePublisherPorts();
@@ -533,6 +535,7 @@ void PortManager::sendToAllMatchingInterfacePorts(const capro::CaproMessage& mes
 
 void PortManager::deletePortsOfProcess(const ProcessName_t& processName) noexcept
 {
+    /// @todo #25 deprecated
     for (auto port : m_portPool->senderPortDataList())
     {
         SenderPortType sender(port);
@@ -542,12 +545,31 @@ void PortManager::deletePortsOfProcess(const ProcessName_t& processName) noexcep
         }
     }
 
+    /// @todo #25 deprecated
     for (auto port : m_portPool->receiverPortDataList())
     {
         ReceiverPortType receiver(port);
         if (processName == receiver.getProcessName())
         {
             destroyReceiverPort(port);
+        }
+    }
+
+    for (auto port : m_portPool->getPublisherPortDataList())
+    {
+        PublisherPortUserType publisher(port);
+        if (processName == publisher.getProcessName())
+        {
+            destroyPublisherPort(port);
+        }
+    }
+
+    for (auto port : m_portPool->getSubscriberPortDataList())
+    {
+        SubscriberPortUserType subscriber(port);
+        if (processName == subscriber.getProcessName())
+        {
+            destroySubscriberPort(port);
         }
     }
 
@@ -742,7 +764,7 @@ PortManager::acquireSenderPortData(const capro::ServiceDescription& service,
     auto result = m_portPool->addSenderPort(service, payloadMemoryManager, processName, portConfigInfo.memoryInfo);
     if (!result.has_error())
     {
-        m_portIntrospection.addSender(result.get_value(), processName, service, runnable);
+        m_portIntrospection.addSender(result.value(), processName, service, runnable);
     }
 
     return result;
@@ -757,8 +779,8 @@ ReceiverPortType::MemberType_t* PortManager::acquireReceiverPortData(const capro
     auto result = m_portPool->addReceiverPort(service, processName, portConfigInfo.memoryInfo);
     if (!result.has_error())
     {
-        m_portIntrospection.addReceiver(result.get_value(), processName, service, runnable);
-        return result.get_value();
+        m_portIntrospection.addReceiver(result.value(), processName, service, runnable);
+        return result.value();
     }
     else
     {
@@ -825,7 +847,7 @@ popo::InterfacePortData* PortManager::acquireInterfacePortData(capro::Interfaces
     auto result = m_portPool->addInterfacePort(processName, interface);
     if (!result.has_error())
     {
-        return result.get_value();
+        return result.value();
     }
     else
     {
@@ -839,7 +861,7 @@ popo::ApplicationPortData* PortManager::acquireApplicationPortData(const Process
     auto result = m_portPool->addApplicationPort(processName);
     if (!result.has_error())
     {
-        return result.get_value();
+        return result.value();
     }
     else
     {
@@ -867,7 +889,7 @@ runtime::RunnableData* PortManager::acquireRunnableData(const ProcessName_t& pro
     auto result = m_portPool->addRunnableData(process, runnable, 0);
     if (!result.has_error())
     {
-        return result.get_value();
+        return result.value();
     }
     else
     {

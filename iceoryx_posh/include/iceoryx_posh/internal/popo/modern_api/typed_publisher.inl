@@ -22,27 +22,18 @@ namespace iox
 namespace popo
 {
 template <typename T, typename base_publisher_t>
-TypedPublisher<T, base_publisher_t>::TypedPublisher(const capro::ServiceDescription& service)
+inline TypedPublisher<T, base_publisher_t>::TypedPublisher(const capro::ServiceDescription& service)
     : base_publisher_t(service)
 {
 }
 
 template <typename T, typename base_publisher_t>
-inline uid_t TypedPublisher<T, base_publisher_t>::getUid() const noexcept
-{
-    return base_publisher_t::getUid();
-}
-
-template <typename T, typename base_publisher_t>
 inline cxx::expected<Sample<T>, AllocationError> TypedPublisher<T, base_publisher_t>::loan() noexcept
 {
-    return base_publisher_t::loan(sizeof(T));
-}
-
-template <typename T, typename base_publisher_t>
-inline void TypedPublisher<T, base_publisher_t>::publish(Sample<T>&& sample) noexcept
-{
-    return base_publisher_t::publish(std::forward<Sample<T>>(sample));
+    // Call default constructor here to ensure the type is immediately ready to use by the caller.
+    // There is a risk that the type will be re-constructed by the user (e.g. by using a placement new in
+    // publishResultOf(), however the overhead is considered to be insignificant and worth the additional safety.
+    return std::move(base_publisher_t::loan(sizeof(T)).and_then([](Sample<T>& sample) { new (sample.get()) T(); }));
 }
 
 template <typename T, typename base_publisher_t>
@@ -58,7 +49,7 @@ inline cxx::expected<AllocationError> TypedPublisher<T, base_publisher_t>::publi
 
     return loan().and_then([&](Sample<T>& sample) {
         c(sample.get(), std::forward<ArgTypes>(args)...);
-        publish(std::move(sample));
+        sample.publish();
     });
 }
 
@@ -67,38 +58,8 @@ inline cxx::expected<AllocationError> TypedPublisher<T, base_publisher_t>::publi
 {
     return loan().and_then([&](Sample<T>& sample) {
         *sample.get() = val; // Copy assignment of value into sample's memory allocation.
-        publish(std::move(sample));
+        sample.publish();
     });
-}
-
-template <typename T, typename base_publisher_t>
-inline cxx::optional<Sample<T>> TypedPublisher<T, base_publisher_t>::loanPreviousSample() noexcept
-{
-    return base_publisher_t::loanPreviousSample();
-}
-
-template <typename T, typename base_publisher_t>
-inline void TypedPublisher<T, base_publisher_t>::offer() noexcept
-{
-    return base_publisher_t::offer();
-}
-
-template <typename T, typename base_publisher_t>
-inline void TypedPublisher<T, base_publisher_t>::stopOffer() noexcept
-{
-    return base_publisher_t::stopOffer();
-}
-
-template <typename T, typename base_publisher_t>
-inline bool TypedPublisher<T, base_publisher_t>::isOffered() const noexcept
-{
-    return base_publisher_t::isOffered();
-}
-
-template <typename T, typename base_publisher_t>
-inline bool TypedPublisher<T, base_publisher_t>::hasSubscribers() const noexcept
-{
-    return base_publisher_t::hasSubscribers();
 }
 
 } // namespace popo

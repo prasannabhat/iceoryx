@@ -29,11 +29,15 @@ template <typename T, typename port_t>
 class StubbedBasePublisher : public iox::popo::BasePublisher<T, port_t>
 {
   public:
-    StubbedBasePublisher(iox::capro::ServiceDescription sd)
-        : iox::popo::BasePublisher<T, port_t>::BasePublisher(sd){};
+    StubbedBasePublisher(iox::capro::ServiceDescription)
+        : iox::popo::BasePublisher<T, port_t>::BasePublisher(){};
     uid_t getUid() const noexcept
     {
         return iox::popo::BasePublisher<T, port_t>::getUid();
+    }
+    iox::capro::ServiceDescription getServiceDescription() const noexcept
+    {
+        return iox::popo::BasePublisher<T, port_t>::getServiceDescription();
     }
     iox::cxx::expected<iox::popo::Sample<T>, iox::popo::AllocationError> loan(uint64_t size) noexcept
     {
@@ -119,7 +123,7 @@ TEST_F(BasePublisherTest, LoanReturnsAllocatedTypedSampleOnSuccess)
     auto result = sut.loan(sizeof(DummyData));
     // ===== Verify ===== //
     // The memory location of the sample should be the same as the chunk payload.
-    EXPECT_EQ(chunk->payload(), result.get_value().get());
+    EXPECT_EQ(chunk->payload(), result.value().get());
     // ===== Cleanup ===== //
     iox::cxx::alignedFree(chunk);
 }
@@ -134,7 +138,7 @@ TEST_F(BasePublisherTest, LoanedSamplesContainPointerToChunkHeader)
     // ===== Test ===== //
     auto result = sut.loan(sizeof(DummyData));
     // ===== Verify ===== //
-    EXPECT_EQ(chunk, result.get_value().getHeader());
+    EXPECT_EQ(chunk, result.value().getHeader());
     // ===== Cleanup ===== //
     iox::cxx::alignedFree(chunk);
 }
@@ -232,4 +236,19 @@ TEST_F(BasePublisherTest, isOfferedDoesCheckIfUnderylingPortHasSubscribers)
     sut.hasSubscribers();
     // ===== Verify ===== //
     // ===== Cleanup ===== //
+}
+
+TEST_F(BasePublisherTest, GetServiceDescriptionCallForwardedToUnderlyingPublisherPort)
+{
+    // ===== Setup ===== //
+    EXPECT_CALL(sut.getMockedPort(), getServiceDescription).Times(1);
+    // ===== Test ===== //
+    sut.getServiceDescription();
+    // ===== Verify ===== //
+    // ===== Cleanup ===== //
+}
+
+TEST_F(BasePublisherTest, DestroysUnderlyingPortOnDestruction)
+{
+    EXPECT_CALL(sut.getMockedPort(), destroy).Times(1);
 }

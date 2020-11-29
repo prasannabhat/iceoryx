@@ -125,7 +125,7 @@ class PortManager_test : public Test
 
 TEST_F(PortManager_test, doDiscovery_singleShotSenderFirst)
 {
-    SenderPort sender(m_shmManager->acquireSenderPortData({1, 1, 1}, "/guiseppe", m_payloadMemoryManager).get_value());
+    SenderPort sender(m_shmManager->acquireSenderPortData({1, 1, 1}, "/guiseppe", m_payloadMemoryManager).value());
     ASSERT_TRUE(sender);
     sender.activate();
     // no doDiscovery() at this position is intentional
@@ -153,7 +153,7 @@ TEST_F(PortManager_test, doDiscovery_singleShotReceiverFirst)
     receiver1.subscribe(true);
     // no doDiscovery() at this position is intentional
 
-    SenderPort sender(m_shmManager->acquireSenderPortData({1, 1, 1}, "/guiseppe", m_payloadMemoryManager).get_value());
+    SenderPort sender(m_shmManager->acquireSenderPortData({1, 1, 1}, "/guiseppe", m_payloadMemoryManager).value());
     ASSERT_TRUE(sender);
     sender.activate();
 
@@ -176,7 +176,7 @@ TEST_F(PortManager_test, doDiscovery_singleShotReceiverFirstWithDiscovery)
     receiver1.subscribe(true);
     m_shmManager->doDiscovery();
 
-    SenderPort sender(m_shmManager->acquireSenderPortData({1, 1, 1}, "/guiseppe", m_payloadMemoryManager).get_value());
+    SenderPort sender(m_shmManager->acquireSenderPortData({1, 1, 1}, "/guiseppe", m_payloadMemoryManager).value());
     ASSERT_TRUE(sender);
     sender.activate();
 
@@ -199,7 +199,7 @@ TEST_F(PortManager_test, doDiscovery_rightOrdering)
     receiver1.subscribe(true);
     m_shmManager->doDiscovery();
 
-    SenderPort sender(m_shmManager->acquireSenderPortData({1, 1, 1}, "/guiseppe", m_payloadMemoryManager).get_value());
+    SenderPort sender(m_shmManager->acquireSenderPortData({1, 1, 1}, "/guiseppe", m_payloadMemoryManager).value());
     ASSERT_TRUE(sender);
     sender.activate();
 
@@ -224,8 +224,8 @@ TEST_F(PortManager_test, doDiscovery_rightOrdering)
 
 TEST_F(PortManager_test, SenderReceiverOverflow)
 {
-    std::string p1 = "/test1";
-    std::string r1 = "run1";
+    iox::ProcessName_t p1 = "/test1";
+    iox::RunnableName_t r1 = "run1";
     decltype(iox::MAX_PUBLISHERS) pubForP1 = iox::MAX_PUBLISHERS;
     decltype(iox::MAX_SUBSCRIBERS) subForP1 = iox::MAX_SUBSCRIBERS;
     std::vector<iox::popo::SenderPortData*> avaSender1(pubForP1);
@@ -234,19 +234,14 @@ TEST_F(PortManager_test, SenderReceiverOverflow)
 
     for (unsigned int i = 0; i < pubForP1; i++)
     {
-        auto sen = m_shmManager->acquireSenderPortData(getUniqueSD(),
-                                                       iox::cxx::CString100(iox::cxx::TruncateToCapacity, p1),
-                                                       m_payloadMemoryManager,
-                                                       iox::cxx::CString100(iox::cxx::TruncateToCapacity, r1));
+        auto sen = m_shmManager->acquireSenderPortData(getUniqueSD(), p1, m_payloadMemoryManager, r1);
         ASSERT_FALSE(sen.has_error());
-        avaSender1[i] = sen.get_value();
+        avaSender1[i] = sen.value();
     }
 
     for (unsigned int i = 0; i < subForP1; i++)
     {
-        auto rec = m_shmManager->acquireReceiverPortData(getUniqueSD(),
-                                                         iox::cxx::CString100(iox::cxx::TruncateToCapacity, p1),
-                                                         iox::cxx::CString100(iox::cxx::TruncateToCapacity, r1));
+        auto rec = m_shmManager->acquireReceiverPortData(getUniqueSD(), p1, r1);
         ASSERT_THAT(rec, Ne(nullptr));
         avaReceiver1[i] = rec;
     }
@@ -258,17 +253,12 @@ TEST_F(PortManager_test, SenderReceiverOverflow)
             [&errorHandlerCalled](const iox::Error error [[gnu::unused]],
                                   const std::function<void()>,
                                   const iox::ErrorLevel) { errorHandlerCalled = true; });
-        auto rec = m_shmManager->acquireReceiverPortData(getUniqueSD(),
-                                                         iox::cxx::CString100(iox::cxx::TruncateToCapacity, p1),
-                                                         iox::cxx::CString100(iox::cxx::TruncateToCapacity, r1));
+        auto rec = m_shmManager->acquireReceiverPortData(getUniqueSD(), p1, r1);
         EXPECT_TRUE(errorHandlerCalled);
         EXPECT_THAT(rec, Eq(nullptr));
 
         errorHandlerCalled = false;
-        auto sen = m_shmManager->acquireSenderPortData(getUniqueSD(),
-                                                       iox::cxx::CString100(iox::cxx::TruncateToCapacity, p1),
-                                                       m_payloadMemoryManager,
-                                                       iox::cxx::CString100(iox::cxx::TruncateToCapacity, r1));
+        auto sen = m_shmManager->acquireSenderPortData(getUniqueSD(), p1, m_payloadMemoryManager, r1);
         EXPECT_TRUE(errorHandlerCalled);
         ASSERT_TRUE(sen.has_error());
         EXPECT_THAT(sen.get_error(), Eq(PortPoolError::SENDER_PORT_LIST_FULL));
@@ -285,14 +275,14 @@ TEST_F(PortManager_test, InterfaceAndApplicationsOverflow)
     {
         auto newItfName = itf + std::to_string(i);
         auto interp = m_shmManager->acquireInterfacePortData(
-            iox::capro::Interfaces::INTERNAL, iox::cxx::CString100(iox::cxx::TruncateToCapacity, newItfName));
+            iox::capro::Interfaces::INTERNAL, iox::ProcessName_t(iox::cxx::TruncateToCapacity, newItfName));
         EXPECT_THAT(interp, Ne(nullptr));
     }
     for (unsigned int i = 0; i < iox::MAX_PROCESS_NUMBER; i++)
     {
         auto newAppName = app + std::to_string(i);
         auto appp =
-            m_shmManager->acquireApplicationPortData(iox::cxx::CString100(iox::cxx::TruncateToCapacity, newAppName));
+            m_shmManager->acquireApplicationPortData(iox::ProcessName_t(iox::cxx::TruncateToCapacity, newAppName));
         EXPECT_THAT(appp, Ne(nullptr));
     }
 
@@ -320,31 +310,31 @@ TEST_F(PortManager_test, InterfaceAndApplicationsOverflow)
         unsigned int testi = 0;
         auto newItfName = itf + std::to_string(testi);
         auto newAppName = app + std::to_string(testi);
-        m_shmManager->deletePortsOfProcess(iox::cxx::CString100(iox::cxx::TruncateToCapacity, newItfName));
-        m_shmManager->deletePortsOfProcess(iox::cxx::CString100(iox::cxx::TruncateToCapacity, newAppName));
+        m_shmManager->deletePortsOfProcess(iox::ProcessName_t(iox::cxx::TruncateToCapacity, newItfName));
+        m_shmManager->deletePortsOfProcess(iox::ProcessName_t(iox::cxx::TruncateToCapacity, newAppName));
 
         auto interfacePointer = m_shmManager->acquireInterfacePortData(
-            iox::capro::Interfaces::INTERNAL, iox::cxx::CString100(iox::cxx::TruncateToCapacity, newItfName));
+            iox::capro::Interfaces::INTERNAL, iox::ProcessName_t(iox::cxx::TruncateToCapacity, newItfName));
         EXPECT_THAT(interfacePointer, Ne(nullptr));
 
         auto appPointer =
-            m_shmManager->acquireApplicationPortData(iox::cxx::CString100(iox::cxx::TruncateToCapacity, newAppName));
+            m_shmManager->acquireApplicationPortData(iox::ProcessName_t(iox::cxx::TruncateToCapacity, newAppName));
         EXPECT_THAT(appPointer, Ne(nullptr));
     }
 }
 
 TEST_F(PortManager_test, PortDestroy)
 {
-    iox::cxx::CString100 p1 = "/myProcess1";
-    iox::cxx::CString100 p2 = "/myProcess2";
+    iox::ProcessName_t p1 = "/myProcess1";
+    iox::ProcessName_t p2 = "/myProcess2";
     iox::capro::ServiceDescription cap1(1, 1, 1);
     iox::capro::ServiceDescription cap2(2, 2, 2);
 
     // two processes p1 and p2 each with a sender and receiver that match to the other process
-    auto senderData1 = m_shmManager->acquireSenderPortData(cap1, p1, m_payloadMemoryManager).get_value();
+    auto senderData1 = m_shmManager->acquireSenderPortData(cap1, p1, m_payloadMemoryManager).value();
     auto receiverData1 = m_shmManager->acquireReceiverPortData(cap2, p1);
 
-    auto senderData2 = m_shmManager->acquireSenderPortData(cap2, p2, m_payloadMemoryManager).get_value();
+    auto senderData2 = m_shmManager->acquireSenderPortData(cap2, p2, m_payloadMemoryManager).value();
     auto receiverData2 = m_shmManager->acquireReceiverPortData(cap1, p2);
 
     // let them connect
@@ -393,7 +383,7 @@ TEST_F(PortManager_test, PortDestroy)
     }
 
     // re-create the ports of process p2
-    senderData2 = m_shmManager->acquireSenderPortData(cap2, p2, m_payloadMemoryManager).get_value();
+    senderData2 = m_shmManager->acquireSenderPortData(cap2, p2, m_payloadMemoryManager).value();
     receiverData2 = m_shmManager->acquireReceiverPortData(cap1, p2);
 
     // let them connect
