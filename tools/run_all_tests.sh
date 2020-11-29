@@ -71,10 +71,11 @@ mkdir -p "$TEST_RESULTS_DIR"
 
 echo ">>>>>> Running Ice0ryx Tests <<<<<<"
 
-if [ $CONTINUE_ON_ERROR == false ]; then
+if [ $CONTINUE_ON_ERROR == true ]; then
+    set +e
+else
     set -e
 fi
-
 
 failed_tests=0
 execute_test () {
