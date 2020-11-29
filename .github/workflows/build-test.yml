@@ -65,12 +65,16 @@ jobs:
           cd $GITHUB_WORKSPACE/build
           ../tools/run_all_tests.sh
 
-      - name : Build sources (clang)
+      - name : Clang Sanitize
         run: |
           export CC=/usr/bin/clang
           export CXX=/usr/bin/clang++
           export NUM_CORES=`nproc`
-          $GITHUB_WORKSPACE/tools/iceoryx_build_test.sh sanitize clean -j $NUM_CORES
+        # build tests , dont run them
+          $GITHUB_WORKSPACE/tools/iceoryx_build_test.sh build-test sanitize clean -j $NUM_CORES
+          cd $GITHUB_WORKSPACE/build
+        # Run tests , continue execution on error (to get maximum failures)
+          ../tools/run_all_tests.sh continue-on-error
 
  # This job builds & runs iceoryx tests in macos-10.15
   macos-build-script:
