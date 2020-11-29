@@ -71,13 +71,25 @@ mkdir -p "$TEST_RESULTS_DIR"
 
 echo ">>>>>> Running Ice0ryx Tests <<<<<<"
 
-if [ $CONTINUE_ON_ERROR == true ]; then
+echo "Value of CONTINUE_ON_ERROR is $CONTINUE_ON_ERROR"
+if [ $CONTINUE_ON_ERROR == true ]
+then
     echo "CONTINUE_ON_ERROR : set +e"
     set +e
 else
     echo "CONTINUE_ON_ERROR : set -e"
     set -e
 fi
+
+if [ '$CONTINUE_ON_ERROR' == true ]
+then
+    echo "CONTINUE_ON_ERROR : set +e"
+    set +e
+else
+    echo "CONTINUE_ON_ERROR : set -e"
+    set -e
+fi
+exit
 
 failed_tests=0
 execute_test () {
