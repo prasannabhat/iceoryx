@@ -72,10 +72,8 @@ mkdir -p "$TEST_RESULTS_DIR"
 echo ">>>>>> Running Ice0ryx Tests <<<<<<"
 
 if [ $CONTINUE_ON_ERROR == true ]; then
-    echo "CONTINUE_ON_ERROR : set +e"
     set +e
 else
-    echo "CONTINUE_ON_ERROR : set -e"
     set -e
 fi
 
@@ -105,10 +103,8 @@ execute_test () {
     # Runs only tests available for the given component
     if [ -f ./$test_binary ]; then
         echo "Executing $test_binary"
-        # ./$test_binary --gtest_filter="${GTEST_FILTER}" --gtest_output="xml:$TEST_RESULTS_DIR/$result_file"
-        lss
+        (./$test_binary --gtest_filter="${GTEST_FILTER}" --gtest_output="xml:$TEST_RESULTS_DIR/$result_file")
     fi
-    lss
 
     if [ $? != 0 ]; then
         ((failed_tests++))
@@ -119,7 +115,7 @@ execute_test () {
 for COMPONENT in $COMPONENTS; do
     echo ""
     echo "######################## executing tests for $COMPONENT ########################"
-    # cd $BASE_DIR/$COMPONENT/test
+    cd $BASE_DIR/$COMPONENT/test
 
     if [ $GCOV_SCOPE == "unit" ] || [ $GCOV_SCOPE == "all" ]; then
         execute_test $COMPONENT unit
@@ -140,7 +136,7 @@ then
     echo "$failed_tests tests failed!"
 fi
 echo ">>>>>> Finished Running Iceoryx Tests <<<<<<"
-# set the return code to test execution status
+# set return code to test execution status
 exit $failed_tests
 
 
