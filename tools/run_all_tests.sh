@@ -71,13 +71,12 @@ mkdir -p "$TEST_RESULTS_DIR"
 
 echo ">>>>>> Running Ice0ryx Tests <<<<<<"
 
-if [ $CONTINUE_ON_ERROR == false ]
-then
+if [ $CONTINUE_ON_ERROR == false ]; then
     set -e
 fi
 
 
-
+failed_tests=0
 execute_test () {
     local component=$1
     local test_scope=$2
@@ -107,6 +106,7 @@ execute_test () {
     fi
 
     if [ $? != 0 ]; then
+        ((failed_tests++))
         echo "$test_scope test for $component failed!"
     fi
 }
@@ -130,11 +130,10 @@ done
 # do not start RouDi while the module and componenttests are running;
 # they might do things which hurts RouDi, like in the roudi_shm test where named semaphores are opened and closed
 
-if [ $test_result != 0 ]
+if [ $failed_tests != 0 ]
 then
-    echo "Not all the tests passed !"
+    echo "$failed_tests tests failed!"
 fi
-echo "test result is $test_result"
 echo ">>>>>> Finished Running Iceoryx Tests <<<<<<"
 
 

@@ -117,8 +117,6 @@ while (( "$#" )); do
         ;;
     "sanitize")
         echo "Build with sanitizers & run tests"
-        export CC=/usr/bin/clang
-        export CXX=/usr/bin/clang++
         BUILD_TYPE="Debug"
         TEST_FLAG="ON"
         RUN_TEST=true
