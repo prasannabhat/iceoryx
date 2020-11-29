@@ -9,6 +9,7 @@ on:
   pull_request:
     branches: [ master ]
 
+jobs:  
   clang-sanitize:
     # The type of runner that the job will run on
     runs-on: ubuntu-18.04
@@ -33,7 +34,5 @@ on:
           cd $GITHUB_WORKSPACE/build
           # Run tests , continue execution on error (to get maximum failures)
           ../tools/run_all_tests.sh continue-on-error
-
-          
-
- 
+    
+    
