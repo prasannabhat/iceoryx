@@ -105,7 +105,7 @@ execute_test () {
     # Runs only tests available for the given component
     if [ -f ./$test_binary ]; then
         echo "Executing $test_binary"
-        ./$test_binary --gtest_filter="${GTEST_FILTER}" --gtest_output="xml:$TEST_RESULTS_DIR/$result_file"
+        (./$test_binary --gtest_filter="${GTEST_FILTER}" --gtest_output="xml:$TEST_RESULTS_DIR/$result_file")
     fi
 
     if [ $? != 0 ]; then
