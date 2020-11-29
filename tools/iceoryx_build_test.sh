@@ -116,10 +116,9 @@ while (( "$#" )); do
         shift 1
         ;;
     "sanitize")
-        echo "Build with sanitizers & run tests"
+        echo "Build with sanitizers"
         BUILD_TYPE="Debug"
         TEST_FLAG="ON"
-        RUN_TEST=true
         SANITIZE_FLAG="ON"
         shift 1
     ;;
@@ -144,7 +143,7 @@ while (( "$#" )); do
         echo "    build-test            Builds the tests (doesn't run)"
         echo "    skip-introspection    Skips building iceoryx introspection"
         echo "    one-to-many           Restricts to 1:n communication only"
-        echo "    sanitize              Build with sanitizers & run tests"
+        echo "    sanitize              Build with sanitizers"
         echo "    help                  Prints this help"
         echo ""
         echo "e.g. iceoryx_build_test.sh -b ./build-scripted clean test release"
