@@ -34,5 +34,12 @@ jobs:
           cd $GITHUB_WORKSPACE/build
           # Run tests , continue execution on error (to get maximum failures)
           ../tools/run_all_tests.sh continue-on-error
-    
+
+      - name: Annotate
+        uses: Attest/annotations-action@v0.1.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          input: './annotations.json'
+          title: 'Annotate Files'
+
     
