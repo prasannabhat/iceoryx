@@ -35,11 +35,13 @@ jobs:
 #           # Run tests , continue execution on error (to get maximum failures)
 #           ../tools/run_all_tests.sh continue-on-error
 
-      - name: Annotate
-        uses: Attest/annotations-action@v1.0.3
-        with:
-          secret: ${{ secrets.GITHUB_TOKEN }}
-          path: './annotations.json'
-          title: 'Annotate Files'
+
+        - name: Annotate
+          uses: yuzutech/annotations-action@v0.2.0
+          with:
+            repo-token: "${{ secrets.GITHUB_TOKEN }}"
+            title: 'lint'
+            input: './annotations.json'
+
 
     
