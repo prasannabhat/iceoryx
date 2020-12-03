@@ -21,8 +21,8 @@ jobs:
 #         # https://github.com/actions/virtual-environments/blob/master/images/linux/Ubuntu1804-README.md
 #         run: sudo apt-get update && sudo apt-get install -y libacl1-dev libncurses5-dev
 
-#       - name : Checkout
-#         uses: actions/checkout@v2
+      - name : Checkout
+        uses: actions/checkout@v2
 
 #       - name : Clang Sanitize
 #         run: |
@@ -36,12 +36,12 @@ jobs:
 #           ../tools/run_all_tests.sh continue-on-error
 
 
-        - name: Annotate
-          uses: yuzutech/annotations-action@v0.2.0
-          with:
-            repo-token: "${{ secrets.GITHUB_TOKEN }}"
-            title: 'lint'
-            input: 'annotations.json'
+      - name: Annotate
+        uses: yuzutech/annotations-action@v0.2.0
+        with:
+          repo-token: "${{ secrets.GITHUB_TOKEN }}"
+          title: 'lint'
+          input: 'annotations.json'
 
 
     
