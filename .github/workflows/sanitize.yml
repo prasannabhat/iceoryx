@@ -41,7 +41,7 @@ jobs:
           with:
             repo-token: "${{ secrets.GITHUB_TOKEN }}"
             title: 'lint'
-            input: './annotations.json'
+            input: 'annotations.json'
 
 
     
