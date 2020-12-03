@@ -1,16 +1,16 @@
 [
     {
-        "file": "path/to/file.js",
+        "file": "CONTRIBUTING.md",
         "line": 5,
-        "title": "title for my annotation",
-        "message": "my message",
+        "title": "markdown error",
+        "message": "markdown error",
         "annotation_level": "failure"
     },
     {
-        "file": "path/to/file.js",
-        "line": 5,
-        "title": "title for my annotation",
-        "message": "my message",
+        "file": "CONTRIBUTING.md",
+        "line": 7,
+        "title": "markdown error",
+        "message": "markdown error",
         "annotation_level": "failure"
     }
 ]
