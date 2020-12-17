@@ -1,0 +1,16 @@
+[
+    {
+        "file": "CONTRIBUTING.md",
+        "line": 5,
+        "title": "markdown error",
+        "message": "markdown error",
+        "annotation_level": "failure"
+    },
+    {
+        "file": "CONTRIBUTING.md",
+        "line": 7,
+        "title": "markdown error",
+        "message": "markdown error",
+        "annotation_level": "failure"
+    }
+]
