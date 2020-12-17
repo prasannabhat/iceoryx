@@ -37,7 +37,7 @@ jobs:
 
 
       - name: Annotate
-        uses: yuzutech/annotations-action@v0.2.0
+        uses: yuzutech/annotations-action@v0.2.1
         with:
           repo-token: "${{ secrets.GITHUB_TOKEN }}"
           title: 'lint'
