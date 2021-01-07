@@ -127,14 +127,17 @@ if(SANITIZE)
         # -fno-sanitize-recover=... print a verbose error report and exit the program
         set(ICEORYX_UB_SANITIZER_FLAGS -fsanitize=undefined -fno-sanitize-recover=undefined)
 
+        set(ICEORYX_THREAD_SANITIZER_FLAGS -fsanitize=thread -fPIE)
+
         # Combine different sanitizer flags to define overall sanitization
-        set(ICEORYX_SANITIZER_FLAGS ${ICEORYX_SANITIZER_COMMON_FLAGS} ${ICEORYX_ADDRESS_SANITIZER_FLAGS} ${ICEORYX_UB_SANITIZER_FLAGS} CACHE INTERNAL "")
+        set(ICEORYX_SANITIZER_FLAGS ${ICEORYX_SANITIZER_COMMON_FLAGS} ${ICEORYX_UB_SANITIZER_FLAGS} ${ICEORYX_THREAD_SANITIZER_FLAGS} CACHE INTERNAL "")
 
         # unset local variables , to avoid polluting global space
         unset(ICEORYX_SANITIZER_BLACKLIST)
         unset(ICEORYX_SANITIZER_COMMON_FLAGS)
         unset(ICEORYX_ADDRESS_SANITIZER_FLAGS)
         unset(ICEORYX_UB_SANITIZER_FLAGS)
+        unset(ICEORYX_THREAD_SANITIZER_FLAGS)
     else()
         message( FATAL_ERROR "You need to run sanitize with gcc/clang compiler." )
     endif()
